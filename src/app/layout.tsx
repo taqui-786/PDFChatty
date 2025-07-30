@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import Provider from "./Provider";
+import { useSession } from "@supabase/auth-helpers-react";
+import Header from "@/components/Header";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,14 +25,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // const session = useSession()
   return (
     <html lang="en">
+      {/* <Provider mySession={session}> */}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster richColors position="bottom-right"/>
+        <main className="h-dvh bg-background flex flex-col items-center justify-center relative overflow-hidden">
+          <Header />
+          {children}
+        </main>
+        <Toaster richColors position="bottom-right" />
       </body>
+      {/* </Provider> */}
     </html>
   );
 }

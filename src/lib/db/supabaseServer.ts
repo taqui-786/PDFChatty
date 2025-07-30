@@ -22,8 +22,15 @@ export async function createClient() {
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
+          
         },
+        
       },
+      auth:{
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
     }
   )
 }

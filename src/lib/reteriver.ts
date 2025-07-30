@@ -9,8 +9,8 @@ const CONFIG = {
   pineconeApiKey: process.env.PINECONE_API_KEY!,
   indexName: "pdfchat",
 };
-const sbApiKey = process.env.SUPABASE_API_KEY as string;
-const sbUrl = process.env.SUPABASE_URL as string;
+const sbApiKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 
 const client = createClient(sbUrl, sbApiKey);
 

@@ -1,13 +1,13 @@
 import React from "react";
-import SigninForm from "./components/SigninForm";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import SigninWithGoogle from "./components/SigninWithGoogle";
 import Logo from "@/components/Logo";
+import SigninWithGoogle from "../signin/components/SigninWithGoogle";
+import SignupForm from "./components/SIgnupForm";
 
-function page() {
+async function page() {
+  
   return (
-    <div className="relative flex h-full flex-1 flex-col items-center justify-center">
+    <div className="relative flex flex-1 h-full flex-col items-center justify-center">
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center items-center">
@@ -21,7 +21,7 @@ function page() {
           </div>
 
           <div className="grid gap-6">
-            <SigninForm />
+            <SignupForm />
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -35,17 +35,17 @@ function page() {
             <SigninWithGoogle />
           </div>
           {/* Additional Links */}
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/signup"
-                className="text-primary hover:underline font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/auth/signin"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
         </div>
       </div>
     </div>

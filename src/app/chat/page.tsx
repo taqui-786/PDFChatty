@@ -3,9 +3,8 @@ import { createClient } from '@/lib/db/supabaseServer';
 import React from 'react'
 
 async function page () {
-    const supabase = await createClient();
-  const test = await  supabase.from('user').select('*')
-  console.log(test);
+  const data = (await createClient()).auth.getUser();
+  const user = (await data).data.user;
   
   return (
     <main className="h-dvh flex items-center justify-center">
