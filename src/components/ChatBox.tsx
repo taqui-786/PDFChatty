@@ -2,18 +2,18 @@
 
 import type React from "react";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Send, FileText, Bot, User } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
-import { getAnswer } from "@/lib/action";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown"
-
+import ReactMarkdown from "react-markdown";
+import { useGetChatbotAnswer } from "@/lib/db/hooks";
+import MarkdownContent from "./MarkdownContent";
 
 interface Message {
   id: string;
@@ -23,16 +23,14 @@ interface Message {
 }
 
 interface PDFChatbotProps {
-  pdfName?: string;
+  chatsPdfId: string;
 }
 
-export default function PDFChatbot({
-  pdfName = "Document.pdf",
-}: PDFChatbotProps) {
+export default function PDFChatbot({ chatsPdfId }: PDFChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: `Hello! I'm ready to help you with questions about "${pdfName}". What would you like to know?`,
+      content: `Hello! I'm ready to help you with questions about this document. What would you like to know?`,
       role: "assistant",
       timestamp: new Date(),
     },
@@ -41,7 +39,7 @@ export default function PDFChatbot({
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const getAnswerMutation = useGetChatbotAnswer();
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -53,8 +51,6 @@ export default function PDFChatbot({
       }
     }
   }, [messages, isTyping]);
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +67,16 @@ export default function PDFChatbot({
     setInput("");
     setIsTyping(true);
 
-    const res = await getAnswer(input.trim(), pdfName);
+    // const res = await getAnswer(`Act as chat bot and reply to this - ${input.trim()}`, "44d43d1b-ece8-4dbf-919a-c626fbc658db");
+    const res = await getAnswerMutation.mutateAsync({
+      question: input.trim(),
+      pdfId: chatsPdfId,
+      requestId:
+        "Chat-" +
+        Date.now().toString(36) +
+        "-" +
+        Math.random().toString(36).substr(2, 5),
+    });
     if (res.success) {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -84,12 +89,23 @@ export default function PDFChatbot({
       setIsTyping(false);
     } else {
       setIsTyping(false);
-      toast.error("Failed to get response...")
+      toast.error("Failed to get response...");
     }
   };
 
+
+    const handleCopyContent = async (content:string) => {
+          if (content) {
+          try {
+            await navigator.clipboard.writeText(content);
+            toast.success("Content copied to clipboard");
+          } catch (error) {
+            toast.error("Failed to copy content");
+          }
+        }
+    }
   const TypingIndicator = () => (
-    <div className="flex items-center space-x-2 p-4 bg-muted/50 rounded-lg">
+    <div className="flex items-center space-x-2 p-4 bg-transparent rounded-lg">
       <Avatar className="h-8 w-8">
         <AvatarFallback className="bg-primary text-primary-foreground">
           <Bot className="h-4 w-4" />
@@ -100,25 +116,13 @@ export default function PDFChatbot({
         <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
         <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
       </div>
-      <span className="text-sm text-muted-foreground">AI is thinking...</span>
+      {/* <span className="text-sm text-muted-foreground">AI is thinking...</span> */}
     </div>
   );
 
   return (
-    <div className="w-full max-w-2xl">
-      <Card className="h-[600px] flex flex-col shadow-lg border-0 bg-gradient-to-b from-background to-muted/20">
-        <CardHeader className="border-b bg-card/50 backdrop-blur-sm">
-          <CardTitle className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="font-semibold">PDF Chat</span>
-            </div>
-            <Badge variant="secondary" className="ml-auto">
-              {pdfName}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-
+    <div className="w-full max-w-full">
+      <Card className="h-[600px]  overflow-y-scroll flex flex-col py-0 shadow-none border-none">
         <CardContent className="flex-1 p-0 overflow-hidden">
           <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
             <div className="space-y-4">
@@ -157,42 +161,46 @@ export default function PDFChatbot({
                           : "bg-muted mr-4"
                       }`}
                     >
-                            {message.role === "assistant" ? (
-                        <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-li:text-foreground">
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children }) => <p className="text-sm leading-relaxed mb-2 last:mb-0">{children}</p>,
-                              strong: ({ children }) => (
-                                <strong className="font-semibold text-foreground">{children}</strong>
-                              ),
-                              ul: ({ children }) => (
-                                <ul className="text-sm space-y-1 ml-4 mb-2 last:mb-0">{children}</ul>
-                              ),
-                              li: ({ children }) => <li className="text-foreground">{children}</li>,
-                              h1: ({ children }) => (
-                                <h1 className="text-base font-semibold mb-2 text-foreground">{children}</h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className="text-sm font-semibold mb-2 text-foreground">{children}</h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className="text-sm font-medium mb-1 text-foreground">{children}</h3>
-                              ),
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
+                      {message.role === "assistant" ? (
+                        <MarkdownContent content={message.content} />
                       ) : (
-                        <p className="text-sm leading-relaxed">{message.content}</p>
+                        <p className="text-sm leading-relaxed">
+                          {message.content}
+                        </p>
                       )}
                     </div>
-                    <span className="text-xs text-muted-foreground px-2">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    {
+                      message.role !== "user" ?
+                      <div className="flex items-center gap-1 ">
+                      <Button variant="ghost" size="icon" className="text-muted-foreground p-0" onClick={() => handleCopyContent(message.content )}>
+                        {" "}
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect
+                            width="14"
+                            height="14"
+                            x="8"
+                            y="8"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                      </Button>
+                      <span className="text-xs text-muted-foreground ">
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                      :""}
                   </div>
                 </div>
               ))}
@@ -221,10 +229,6 @@ export default function PDFChatbot({
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Ask questions about the PDF content, request summaries, or search
-            for specific information.
-          </p>
         </div>
       </Card>
     </div>

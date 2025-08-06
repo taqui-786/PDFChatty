@@ -1,6 +1,4 @@
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { PineconeStore } from "@langchain/pinecone";
-import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
 // Configuration
@@ -20,13 +18,8 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: CONFIG.geminiApiKey,
 });
 
-// Pinecone client instance
-const pinecone = new PineconeClient({
-  apiKey: CONFIG.pineconeApiKey,
-});
 
-// Initialize Pinecone index (reused)
-const pineconeIndex = pinecone.Index(CONFIG.indexName);
+
 
 export const vectorStore = new SupabaseVectorStore(embeddings, {
     client,
@@ -36,7 +29,7 @@ export const vectorStore = new SupabaseVectorStore(embeddings, {
 
 export const getRetriever =  (id:string) => vectorStore.asRetriever({
   filter:{
-    "metadata->>'user_id'":id
+    "metadata->>'pdf_id'":id
   }
 })
 

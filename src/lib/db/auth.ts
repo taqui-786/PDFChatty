@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "./supabaseServer";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { cache } from "react";
+import { Session, User } from "@supabase/supabase-js";
 
 export async function createUser(
   fullname: string,
@@ -12,17 +14,16 @@ export async function createUser(
 ) {
   try {
     const supabase = await createClient();
-  const payload = {
-  email,
-  password,
-  options: {
-    data: {
-      full_name: fullname,
-      display_name: fullname,
-     
-    }
-  }
-};
+    const payload = {
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullname,
+          display_name: fullname,
+        },
+      },
+    };
     const { data, error } = await supabase.auth.signUp(payload);
     if (error) {
       return { success: false, error: error.message };
@@ -142,4 +143,59 @@ export async function signInWithGoogle() {
     redirect(data.url); // use the redirect API for your server framework
   }
   return { success: true, data };
+}
+
+export const validateRequest = cache(
+  async (): Promise<{ user: User } | { user: null }> => {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+
+    return {user: data?.user };
+  }
+);
+export const createPdfChat = async (pdfName: string, pdfSize: string, pdfUrl:string) => {
+  try {
+    
+  
+  const supabase = await createClient();
+  const session = await validateRequest();
+  const userId = session?.user?.id;
+  const { data, error } = await supabase
+    .from("chats")
+    .insert({
+      userid: userId,
+      pdfname: pdfName,
+      pdfsize: pdfSize,
+      pdfurl: pdfUrl,
+    })
+    .select()
+    .single();
+  if (error) {
+    console.error("Error creating chat:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data };
+} catch (error) {
+  console.log(error);
+  return { success: false, error: (error as Error).message };
+    
+  }
+};
+
+export const getUserChats = async () => {
+  try {
+      const session = await validateRequest();
+     const userId = session?.user?.id;
+     const supabase = await createClient();
+     console.log(userId);
+     
+     const { data } = await supabase
+       .from("chats")
+       .select("*").eq("userid", userId)
+       .order("createdat", { ascending: false });
+
+       return { success: true, data };
+  } catch (error) {
+     return { success: false, error: (error as Error).message };
+  }
 }

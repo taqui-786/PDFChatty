@@ -121,3 +121,83 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* React Flow custom styles */
+.react-flow__node.selected {
+  outline: none;
+}
+
+.react-flow__handle {
+  background: #1a192b;
+  border: 2px solid #fff;
+}
+
+.react-flow__handle.connected {
+  background: #ff6b6b;
+}
+
+/* PDF Node specific styles */
+.react-pdf__Page {
+  display: flex !important;
+  justify-content: center;
+}
+
+.react-pdf__Page__canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  height: auto !important;
+  width: auto !important;
+}
+
+/* Smooth scrolling for PDF content */
+.react-pdf__Document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Custom scrollbar for PDF areas */
+.pdf-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pdf-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.pdf-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.pdf-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* for cursor */
+
+.custom-reactflow {
+  cursor: auto !important;
+}
+
+.custom-reactflow .react-flow__pane {
+  cursor: auto !important;
+}
+
+.custom-reactflow .react-flow__pane.dragging {
+  cursor: grabbing !important;
+}
+
+.custom-reactflow .react-flow__node {
+  cursor: pointer !important;
+}
+
+.custom-reactflow .react-flow__edge {
+  cursor: pointer !important;
+}
+
+/* For connection mode */
+.custom-reactflow .react-flow__connectionline {
+  cursor: crosshair !important;
+}

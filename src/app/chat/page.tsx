@@ -1,16 +1,22 @@
-import UploadDocument from '@/components/UploadDocument'
-import { createClient } from '@/lib/db/supabaseServer';
-import React from 'react'
 
-async function page () {
-  const data = (await createClient()).auth.getUser();
-  const user = (await data).data.user;
+import UploadDocument from "@/app/chat/components/UploadDocument";
+import DocHistory from "./components/DocHistory";
+import { getUserChats } from "@/lib/db/auth";
+
+
+
+export default async function  Page() {
+  const res = await getUserChats()
   
   return (
-    <main className="h-dvh flex items-center justify-center">
-        <UploadDocument/>
-    </main>
-  )
-}
+    <main className="h-dvh w-full flex items-center justify-center bg-background">
+      <div className="p-4 w-full max-w-3xl">
+        {/* Upload Section */}
+        <UploadDocument />
 
-export default page
+        {/* Document History Section */}
+        <DocHistory chats={res.data || []} />
+      </div>
+    </main>
+  );
+}

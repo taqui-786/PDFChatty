@@ -2,10 +2,17 @@
 
 import { FileText } from "lucide-react";
 import { useState, useRef } from "react";
-import { Button } from "./ui/button";
-import { storeToVectorDB } from "@/lib/action";
+import {  storeToVectorDB } from "@/lib/action";
 import { toast } from "sonner";
-import PDFChatbot from "./ChatBox";
+import PdfChatCard from "../../../components/PdfChatCard";
+import { useRouter } from "next/navigation";
+import {
+  isUploadError,
+  isUploadSuccess,
+  uploadPDFFile,
+  UploadResponse,
+} from "@/lib/firebase";
+import { createPdfChat } from "@/lib/db/auth";
 
 export default function UploadDocument() {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -13,6 +20,8 @@ export default function UploadDocument() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [embeddingDocs, setEmbeddingDocs] = useState(false);
   const [embeddingFile, setEmbeddingFile] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
+  const router = useRouter();
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -33,24 +42,21 @@ export default function UploadDocument() {
     }
   };
 
-const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
-  // Ensure a file was selected
-  if (!file) return;
+    if (!file) return;
 
-  // Enforce 1MB size limit
-  const maxSizeInBytes = 3 * 1024 * 1024; // 1MB
-  if (file.size > maxSizeInBytes) {
-    toast.warning("File size exceeds 1MB. Please upload a smaller file.");
-    e.target.value = ""; // Clear the file input
-    return;
-  }
+    // Enforce 1MB size limit
+    const maxSizeInBytes = 3 * 1024 * 1024; // 1MB
+    if (file.size > maxSizeInBytes) {
+      toast.warning("File size exceeds 1MB. Please upload a smaller file.");
+      e.target.value = ""; // Clear the file input
+      return;
+    }
 
-  // Set the file if valid
-  setUploadedFile(file);
-};
-
+    setUploadedFile(file);
+  };
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -64,34 +70,73 @@ const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  async function handlePDFUpload(file: File) {
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      console.log("Please select a PDF file");
+      return;
+    }
+
+    try {
+      const result: UploadResponse = await uploadPDFFile(
+        file,
+        (progress: number) => {
+          console.log(`Upload progress: ${progress.toFixed(2)}%`);
+        }
+      );
+
+      if (isUploadSuccess(result)) {
+        setPdfUrl(result.file.url);
+        toast.success(`${result.file.name} is uploaded🎉`);
+        return { pdfUrl: result.file.url };
+      } else if (isUploadError(result)) {
+        console.error("Upload failed:", result.error);
+        toast.error(result.error);
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Upload failed:", errorMessage);
+      toast.error(errorMessage);
+    }
+  }
+
   const handleStartChat = async () => {
     if (!uploadedFile) {
       return;
     }
     setEmbeddingDocs(true);
-    const res = await storeToVectorDB(uploadedFile);
-    console.log({ res });
+
+    const uploadedPdf = await handlePDFUpload(uploadedFile);
+    if (!uploadedPdf?.pdfUrl) return toast.error("System error!");
+    const createChat = await createPdfChat(
+      uploadedFile.name,
+      formatFileSize(uploadedFile.size),
+      uploadedPdf.pdfUrl
+    );
+    if (!createChat.success) {
+      toast.error("Failed to create chat. Please try again.");
+      setEmbeddingDocs(false);
+      return;
+    }
+    const res = await storeToVectorDB(uploadedFile, createChat.data.id,createChat.data.userid);
 
     if (res.success) {
       toast.success("You are ready to Chat...");
       setEmbeddingFile(`user-${uploadedFile.name}`);
+      router.push(`/chat/${createChat.data.id}`);
     } else {
       toast.error("Failed to embed documents...");
     }
     setEmbeddingDocs(false);
   };
 
-
-if(embeddingFile.length){
   return (
-       <div className="min-h-dvh bg-gradient-to-br from-background via-muted/20 to-background flex items-center justify-center p-4">
-      <PDFChatbot pdfName={embeddingFile} />
-    </div>
-  )
-}
-
-  return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full ">
       {!uploadedFile ? (
         <div
           className={`
@@ -137,54 +182,13 @@ if(embeddingFile.length){
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-2  items-center justify-center">
-          <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-primary/70"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-gray-900">{uploadedFile.name}</p>
-                <p className="text-sm text-gray-500">
-                  {formatFileSize(uploadedFile.size)}
-                </p>
-              </div>
-              <button
-                onClick={() => setUploadedFile(null)}
-                className="text-muted-foreground hover:text-gray-600 transition-colors"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <Button onClick={handleStartChat} disabled={embeddingDocs}>
-            {embeddingDocs ? "Analyizing your docs..." : "Let's start Chatting"}
-          </Button>
-        </div>
+        <PdfChatCard
+          fileName={uploadedFile.name}
+          isInitializing={embeddingDocs}
+          fileSize={formatFileSize(uploadedFile.size)}
+          onStartChat={handleStartChat}
+          onCancel={() => setUploadedFile(null)}
+        />
       )}
     </div>
   );
