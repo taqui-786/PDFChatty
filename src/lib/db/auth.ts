@@ -5,8 +5,7 @@ import { createClient } from "./supabaseServer";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cache } from "react";
-import { Session, User } from "@supabase/supabase-js";
-
+import {  User } from "@supabase/supabase-js";
 export async function createUser(
   fullname: string,
   email: string,
@@ -62,6 +61,7 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -153,16 +153,21 @@ export const validateRequest = cache(
     return {user: data?.user };
   }
 );
-export const createPdfChat = async (pdfName: string, pdfSize: string, pdfUrl:string) => {
+export const createPdfChat = async (uuid:string,pdfName: string, pdfSize: string, pdfUrl:string) => {
   try {
     
   
   const supabase = await createClient();
   const session = await validateRequest();
   const userId = session?.user?.id;
+  const chatLimit = await supabase.from('chats').select('*',{count: 'exact',head:true}).eq('userid',userId)
+  if(chatLimit?.count !== null && chatLimit?.count >= 3){
+    return { success: false, error: 'You have reached the limit of 3 chats' };
+  }
   const { data, error } = await supabase
     .from("chats")
     .insert({
+      id:uuid,
       userid: userId,
       pdfname: pdfName,
       pdfsize: pdfSize,

@@ -2,7 +2,7 @@
 
 import { FileText } from "lucide-react";
 import { useState, useRef } from "react";
-import {  storeToVectorDB } from "@/lib/action";
+import { storeToVectorDB } from "@/lib/action";
 import { toast } from "sonner";
 import PdfChatCard from "../../../components/PdfChatCard";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import {
   UploadResponse,
 } from "@/lib/firebase";
 import { createPdfChat } from "@/lib/db/auth";
+import { v4 as uuidv4 } from "uuid";
 
 export default function UploadDocument() {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -91,7 +92,7 @@ export default function UploadDocument() {
 
       if (isUploadSuccess(result)) {
         setPdfUrl(result.file.url);
-        toast.success(`${result.file.name} is uploaded🎉`);
+        // toast.success(`${result.file.name} is uploaded🎉`);
         return { pdfUrl: result.file.url };
       } else if (isUploadError(result)) {
         console.error("Upload failed:", result.error);
@@ -105,42 +106,51 @@ export default function UploadDocument() {
     }
   }
 
-  const handleStartChat = async () => {
-    if (!uploadedFile) {
-      return;
-    }
-    setEmbeddingDocs(true);
 
-    const uploadedPdf = await handlePDFUpload(uploadedFile);
-    if (!uploadedPdf?.pdfUrl) return toast.error("System error!");
-    const createChat = await createPdfChat(
-      uploadedFile.name,
-      formatFileSize(uploadedFile.size),
-      uploadedPdf.pdfUrl
-    );
-    if (!createChat.success) {
-      toast.error("Failed to create chat. Please try again.");
+  const handleCreateChat = async () => {
+    try {
+      if (!uploadedFile) {
+        return;
+      }
+
+      const uuid = uuidv4();
+      const toastId = toast.loading(" Processing your data...");
+      setEmbeddingDocs(true);
+      const res = await storeToVectorDB(uploadedFile, uuid);
+
+      if (!res.success) {
+        return toast.error(res.error, { id: toastId });
+      }
+      toast.loading("Now Uploading your PDF...", { id: toastId });
+      const uploadedPdf = await handlePDFUpload(uploadedFile);
+      if (!uploadedPdf?.pdfUrl) return toast.error("System error!");
+      toast.loading("Last - Getting chat ready...", { id: toastId });
+
+      const createChat = await createPdfChat(
+        uuid,
+        uploadedFile.name,
+        formatFileSize(uploadedFile.size),
+        uploadedPdf.pdfUrl
+      );
+      if (!createChat.success) {
+        toast.error(createChat.error, { id: toastId });
+        return;
+      }
+       setEmbeddingFile(`user-${uploadedFile.name}`);
+      router.push(`/chat/${uuid}`);
+      toast.success('You are ready to chat...',{id:toastId})
+    } catch (error) {
+      toast.error("System error!");
+    } finally {
       setEmbeddingDocs(false);
-      return;
     }
-    const res = await storeToVectorDB(uploadedFile, createChat.data.id,createChat.data.userid);
-
-    if (res.success) {
-      toast.success("You are ready to Chat...");
-      setEmbeddingFile(`user-${uploadedFile.name}`);
-      router.push(`/chat/${createChat.data.id}`);
-    } else {
-      toast.error("Failed to embed documents...");
-    }
-    setEmbeddingDocs(false);
   };
-
   return (
     <div className="w-full ">
       {!uploadedFile ? (
         <div
           className={`
-            relative border-2 border-dashed rounded-lg p-12 text-center cursor-pointer
+            relative border-4 border-dashed rounded-lg p-12 text-center cursor-pointer
             transition-all duration-200 ease-in-out
             ${
               isDragOver
@@ -186,7 +196,7 @@ export default function UploadDocument() {
           fileName={uploadedFile.name}
           isInitializing={embeddingDocs}
           fileSize={formatFileSize(uploadedFile.size)}
-          onStartChat={handleStartChat}
+          onStartChat={handleCreateChat}
           onCancel={() => setUploadedFile(null)}
         />
       )}

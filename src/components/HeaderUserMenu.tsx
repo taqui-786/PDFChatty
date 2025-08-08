@@ -27,7 +27,8 @@ export default function HeaderUserMenu({ email, avatarUrl,fullname = "MD"  }: He
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
           <Avatar>
             <AvatarImage src={avatarUrl} alt="Profile image" />
-            <AvatarFallback>{!fullname?.split(" ")[0].slice(0,1) + " " + !fullname?.split(" ")[1].slice(0,1)}</AvatarFallback>
+            <AvatarFallback>{fullname.charAt(0)
+              .toUpperCase()}</AvatarFallback>
           </Avatar>
           <ChevronDownIcon
             size={16}

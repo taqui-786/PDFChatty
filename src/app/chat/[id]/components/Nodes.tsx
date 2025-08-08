@@ -2,17 +2,20 @@ import { Handle, Node, NodeProps, Position, useReactFlow } from "reactflow";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { BotMessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import MarkdownContent from "../../../components/MarkdownContent";
 import { useGetAnswer } from "@/lib/db/hooks";
 import { Tool, Tools } from "./Tool";
 import ChatDailog from "./ChatDailog";
-
+import axios from "axios";
+import MarkdownContent from "@/components/MarkdownContent";
 interface MyCustomNodeProps {
-type:string;
-pdfId:string;
+  type: string;
+  pdfId: string;
 }
-export const MyCustomNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>) => {
-
+export const MyCustomNode = ({
+  data,
+  selected,
+  id,
+}: NodeProps<MyCustomNodeProps>) => {
   const theNode: Tool | undefined = useMemo(
     () => Tools.find((tool) => tool.type === data.type),
     [data.type]
@@ -35,26 +38,13 @@ export const MyCustomNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps
 
       hasInitialized.current = true;
 
-     
-
-      // const result = await new Promise((resolve) => {
-      //   setTimeout(() => {
-      //     resolve({
-      //       success: true,
-      //       answer: theNode.prompt, 
-      //       requestId: theNode.id,
-      //     });
-      //   }, 4000);
-      // });
-
-      const result = await getAnswerMutation.mutateAsync({
+      const result = await axios.post("/api/tool", {
         question: theNode.prompt,
         pdfId: data.pdfId,
         requestId: theNode.id,
       });
-
-      if (result.success && result.answer) {
-        setContent(result.answer as string);
+      if (result.data && result.data?.answer) {
+        setContent(result.data?.answer as string);
       } else {
         toast.error("Something went wrong");
         hasInitialized.current = false;
@@ -241,7 +231,10 @@ export const MyCustomNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps
         >
           {loading ? (
             <div className="flex flex-col gap-4 items-center justify-center h-36 w-full">
-              <Loader2 className={`animate-spin text-[${theNode?.color.text}]`} size={28} />
+              <Loader2
+                className={`animate-spin text-[${theNode?.color.text}]`}
+                size={28}
+              />
               <span className="text-sm text-muted-foreground">
                 generating result...
               </span>
@@ -281,10 +274,12 @@ export const MyCustomNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps
   );
 };
 
-export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>) => {
-
+export const MyChatNode = ({
+  data,
+  selected,
+  id,
+}: NodeProps<MyCustomNodeProps>) => {
   const { fitView } = useReactFlow();
-
 
   const handleFullscreen = useCallback(
     (e: React.MouseEvent) => {
@@ -301,10 +296,6 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
     [fitView, id]
   );
 
-
-
-
-
   return (
     <div
       className={` ${selected ? "selected" : ""}`}
@@ -312,7 +303,7 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
         width: 400,
         border: selected ? "2px solid #007bff" : "1px solid #ddd",
         borderRadius: "8px",
-        background:  "#fff",
+        background: "#fff",
         boxShadow: selected
           ? "0 4px 12px rgba(0,123,255,0.3)"
           : "0 2px 8px rgba(0,0,0,0.1)",
@@ -333,7 +324,7 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
             alignItems: "center",
             fontWeight: "bold",
             fontSize: "14px",
-            color:  "#333",
+            color: "#333",
             marginBottom: "8px",
             borderBottom: "1px solid #eee",
             paddingBottom: "4px",
@@ -348,7 +339,7 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
               marginRight: "8px",
             }}
           >
-             Chat with Document
+            Chat with Document
           </div>
 
           <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
@@ -382,8 +373,6 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
                 <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
               </svg>
             </button>
-
-       
           </div>
         </div>
 
@@ -401,12 +390,10 @@ export const MyChatNode = ({ data, selected, id }: NodeProps<MyCustomNodeProps>)
           }}
         >
           <div className="flex flex-col gap-4 items-center justify-center py-8">
-
-          <BotMessageSquare className="size-14 " />
-          <ChatDailog pdfId={data.pdfId} />
-
+            <BotMessageSquare className="size-14 " />
+            <ChatDailog pdfId={data.pdfId} />
           </div>
-  {/* ------------------- */}
+          {/* ------------------- */}
         </div>
       </div>
 

@@ -2,12 +2,12 @@
 
 
 
-export function combineDocuments(docs) {
+export function combineDocuments(docs:Array<{pageContent:string}>) {
   return docs.map((doc) => doc.pageContent).join("\n\n");
 }
 
 
-export function formatConvHistory(messages) {
+export function formatConvHistory(messages:Array<string>) {
   return messages
     .map((message, i) => {
       if (i % 2 === 0) {

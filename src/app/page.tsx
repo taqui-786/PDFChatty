@@ -1,70 +1,59 @@
-import { Button } from "@/components/ui/button";
-import { Upload, Zap, Shield, Clock } from "lucide-react";
-import Link from "next/link";
 
-
-
- function Page () {
- 
+function Page() {
   return (
-   
-      <section className="container mx-auto px-6 py-20 max-w-7xl flex-1 flex items-center justify-center">
-
-        <div className="max-w-4xl mx-auto text-center space-y-12">
-          {/* Main Headline */}
-          <div className="space-y-6">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-gray-900">
-              Transform your PDFs into{" "}
-              <span className="text-primary">conversations</span>
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light">
-              Upload any PDF and chat with it instantly. Get summaries, ask
-              questions, and extract insights using advanced AI — completely
-              free.
-            </p>
-          </div>
-
-          {/* Main CTA */}
-          <div className="space-y-4">
-            <Button
-              size="lg"
-              className=" text-lg px-10 py-4 rounded-lg cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md group"
+    <div className="flex-1 space-y-16 px-6 py-20 sm:space-y-20">
+      <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
+        <h2 className="text-3xl leading-[1.2] font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
+          Your PDFs Just Got 100x Smarter
+        </h2>
+        <p className="text-muted-foreground mt-6 text-center text-xl tracking-normal text-balance sm:text-2xl sm:leading-normal md:text-3xl">
+        Drag, drop, and dissect every page with AI tools designed for serious document wrangling.
+        </p>
+        <div className="mx-auto mt-10 flex w-full max-w-xs flex-col items-center justify-center gap-4 sm:flex-row">
+          <button
+            data-slot="button"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-primary/70 focus-visible:ring-primary/20 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-12 px-6 has-[>svg]:px-6 text-lg leading-[0.1] [&amp;_svg:not([className*='size-'])]:size-5 w-full sm:w-auto"
+          >
+            Get Started{" "}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="lucide lucide-arrow-up-right"
+              aria-hidden="true"
             >
-              <Link href="/chat" className="flex items-center gap-3">
-                <Upload className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                Start Chatting with Your PDF
-              </Link>
-            </Button>
-            <p className="text-sm text-gray-500 font-medium">
-              ✨ No account needed • 🚀 Unlimited uploads • 🔒 Privacy first
-            </p>
-          </div>
-
-          {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-4 mt-16">
-            <div className="flex items-center gap-2 bg-gray-50 rounded-full px-5 py-2.5 border border-gray-200 hover:border-gray-300 transition-colors duration-200">
-              <Zap className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Instant AI Analysis
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-50 rounded-full px-5 py-2.5 border border-gray-200 hover:border-gray-300 transition-colors duration-200">
-              <Shield className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-gray-700">
-                100% Secure
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-50 rounded-full px-5 py-2.5 border border-gray-200 hover:border-gray-300 transition-colors duration-200">
-              <Clock className="w-4 h-4 text-primary-600" />
-              <span className="text-sm font-medium text-gray-700">
-                No Time Limits
-              </span>
-            </div>
-          </div>
+              <path d="M7 7h10v10"></path>
+              <path d="M7 17 17 7"></path>
+            </svg>
+          </button>
+          <button
+            data-slot="button"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-primary/70 focus-visible:ring-primary/20 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-12 px-6 has-[>svg]:px-6 text-lg leading-[0.1] [&amp;_svg:not([className*='size-'])]:size-5 w-full sm:w-auto"
+          >
+            Learn More
+          </button>
         </div>
-      </section>
-
+      </div>
+      <div className="bg-muted mx-auto aspect-video w-full  max-w-screen-xl rounded-lg border p-1.5 sm:p-2.5 sm:shadow-lg">
+        <img
+          src="/images/code-explorer.png"
+          alt=""
+          className="h-full w-full rounded-md border object-cover object-top dark:hidden"
+        />
+        <img
+          src="/images/code-explorer-dark.png"
+          alt=""
+          className="hidden h-full w-full rounded-md border object-cover object-top dark:block"
+        />
+      </div>
+    </div>
   );
-};
+}
 
 export default Page;

@@ -9,7 +9,7 @@ export default async function  Page() {
   const res = await getUserChats()
   
   return (
-    <main className="h-dvh w-full flex items-center justify-center bg-background">
+    <main className="flex-1 w-full flex items-center justify-center bg-background">
       <div className="p-4 w-full max-w-3xl">
         {/* Upload Section */}
         <UploadDocument />

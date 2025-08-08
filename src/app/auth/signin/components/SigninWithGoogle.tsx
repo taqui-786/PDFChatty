@@ -25,13 +25,13 @@ function SigninWithGoogle() {
     }
   };
   return (
-    <Button variant="outline" className="w-full" disabled={loading} onClick={handleGoogleSignIn}>
+    <Button variant="ghost" className="w-full border" size={'lg'} disabled={loading} onClick={handleGoogleSignIn}>
       {loading ? (
         <span>Loading...</span>
       ) : (
         <>
           <Google className="mr-2 size-5" />
-          Sign In with Google
+          Continue with Google
         </>
       )}
     </Button>

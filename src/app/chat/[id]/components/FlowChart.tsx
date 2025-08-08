@@ -2,7 +2,6 @@
 
 import React, { DragEvent, useCallback, useRef, useState } from "react";
 import ReactFlow, {
-  MiniMap,
   Controls,
   useNodesState,
   useEdgesState,
@@ -200,7 +199,7 @@ export default function FlowChart({chat}:{chat:Chat}) {
   );
 
   return (
-    <div style={{ width: "100vw", height: "95vh" }} className="flex">
+    <div className="flex flex-1 h-[calc(100vh-5rem)] w-screen  relative overflow-hidden">
       <div className="flex-1" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
@@ -220,18 +219,18 @@ export default function FlowChart({chat}:{chat:Chat}) {
             includeHiddenNodes: false,
           }}
           attributionPosition="bottom-right"
-          className="bg-gray-50 transition-colors duration-200 custom-reactflow"
+          className="bg-background   custom-reactflow"
           selectNodesOnDrag={false}
           onlyRenderVisibleElements={true}
         >
           <Background />
           <Controls showZoom={true} showFitView={true} showInteractive={true} />
-          <MiniMap
+          {/* <MiniMap
             nodeStrokeColor="#333"
             nodeBorderRadius={2}
             maskColor="rgba(255, 255, 255, 0.2)"
-            className="bg-white/80 backdrop-blur-sm"
-          />
+            className="bg-white/80 backdrop-blur-sm absolute"
+          /> */}
         </ReactFlow>
       </div>
       <Sidebar />

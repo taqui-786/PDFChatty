@@ -67,7 +67,6 @@ export default function PDFChatbot({ chatsPdfId }: PDFChatbotProps) {
     setInput("");
     setIsTyping(true);
 
-    // const res = await getAnswer(`Act as chat bot and reply to this - ${input.trim()}`, "44d43d1b-ece8-4dbf-919a-c626fbc658db");
     const res = await getAnswerMutation.mutateAsync({
       question: input.trim(),
       pdfId: chatsPdfId,
@@ -93,17 +92,16 @@ export default function PDFChatbot({ chatsPdfId }: PDFChatbotProps) {
     }
   };
 
-
-    const handleCopyContent = async (content:string) => {
-          if (content) {
-          try {
-            await navigator.clipboard.writeText(content);
-            toast.success("Content copied to clipboard");
-          } catch (error) {
-            toast.error("Failed to copy content");
-          }
-        }
+  const handleCopyContent = async (content: string) => {
+    if (content) {
+      try {
+        await navigator.clipboard.writeText(content);
+        toast.success("Content copied to clipboard");
+      } catch (error) {
+        toast.error("Failed to copy content");
+      }
     }
+  };
   const TypingIndicator = () => (
     <div className="flex items-center space-x-2 p-4 bg-transparent rounded-lg">
       <Avatar className="h-8 w-8">
@@ -169,38 +167,44 @@ export default function PDFChatbot({ chatsPdfId }: PDFChatbotProps) {
                         </p>
                       )}
                     </div>
-                    {
-                      message.role !== "user" ?
+                    {message.role !== "user" ? (
                       <div className="flex items-center gap-1 ">
-                      <Button variant="ghost" size="icon" className="text-muted-foreground p-0" onClick={() => handleCopyContent(message.content )}>
-                        {" "}
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground p-0"
+                          onClick={() => handleCopyContent(message.content)}
                         >
-                          <rect
+                          {" "}
+                          <svg
                             width="14"
                             height="14"
-                            x="8"
-                            y="8"
-                            rx="2"
-                            ry="2"
-                          />
-                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                        </svg>
-                      </Button>
-                      <span className="text-xs text-muted-foreground ">
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                      :""}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <rect
+                              width="14"
+                              height="14"
+                              x="8"
+                              y="8"
+                              rx="2"
+                              ry="2"
+                            />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                          </svg>
+                        </Button>
+                        <span className="text-xs text-muted-foreground ">
+                          {message.timestamp.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </div>
               ))}

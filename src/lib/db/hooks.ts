@@ -1,9 +1,9 @@
-import { useMutation, useQueries } from "@tanstack/react-query";
-import { getAnswer, getChatBotAnswer } from "../action";
+import { useMutation } from "@tanstack/react-query";
+import { getAnswer, getAnswerTesting, getChatBotAnswer } from "../action";
 export const useGetAnswer = () => {
   
   return useMutation({
-    mutationFn: getAnswer,
+    mutationFn: getAnswerTesting,
     onSuccess: (data, variables) => {
       console.log(`Request ${variables.requestId} completed successfully`);
       // Optionally invalidate related queries

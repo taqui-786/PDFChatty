@@ -10,17 +10,17 @@ import {
   RunnablePassthrough,
 } from "@langchain/core/runnables";
 import { combineDocuments, formatConvHistory } from "./helperFunc";
-import { createClient } from "./db/supabaseServer";
+import { validateRequest } from "./db/auth";
 
 const llm = new ChatGoogleGenerativeAI({
   model: "gemini-2.5-flash",
   temperature: 0,
   apiKey: process.env.GOOGLE_API_KEY,
 });
-interface GetAnswerParams {
+export interface GetAnswerParams {
   question: string;
   pdfId: string;
-  requestId?: string; // Add unique identifier for each request
+  requestId?: string;
 }
 
 interface GetAnswerResponse {
@@ -81,7 +81,7 @@ const answerPromptTemplate = PromptTemplate.fromTemplate(answerTemplate);
 export const getAnswer = async (
   params: GetAnswerParams
 ): Promise<GetAnswerResponse> => {
-  const { pdfId, requestId,question } = params;
+  const { pdfId, requestId, question } = params;
 
   try {
     const systemPromptChain = systemPromptTemplate
@@ -211,11 +211,14 @@ Answer:
 export const storeToVectorDB = async (
   file: File,
   pdf_id: string,
-  user_id: string
 ) => {
   try {
     if (!file) {
       throw new Error("No file provided");
+    }
+    const { user } = await validateRequest();
+    if (!user) {
+      return { success: false, error: "Not Authenticated" };
     }
     const buffer = await file.arrayBuffer();
     const loader = new PDFLoader(new Blob([buffer]), {
@@ -223,24 +226,31 @@ export const storeToVectorDB = async (
     });
 
     const pages = await loader.load();
-    console.log(`✅ Loaded ${pages.length} pages`);
+    // console.log(`✅ Loaded ${pages.length} pages`);
 
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
     });
     const splittedDocs = await splitter.splitDocuments(pages);
-    console.log(`✅ Created ${splittedDocs.length} chunks`);
+    // console.log(`✅ Created ${splittedDocs.length} chunks`);
+    if (!splittedDocs.length) {
+      return {
+        success: false,
+        error:
+          "No readable pages found in PDF. It may be scanned or image-based.",
+      };
+    }
 
     const docsWithMetadata = splittedDocs.map((doc) => ({
       ...doc,
       metadata: {
         ...doc.metadata,
-        user_id,
+        user_id: user.id,
         pdf_id,
       },
     }));
 
-    await uploadToSupabase(docsWithMetadata); // Use the modified docs
+    await uploadToSupabase(docsWithMetadata); 
     return { success: true };
   } catch (error) {
     console.log(error);
@@ -248,3 +258,18 @@ export const storeToVectorDB = async (
   }
 };
 
+export const getAnswerTesting = async (
+  params: GetAnswerParams
+): Promise<GetAnswerResponse> => {
+  console.log("got request - ");
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        success: true,
+        answer: "string",
+        requestId: "string",
+      });
+    }, 4000);
+  });
+};

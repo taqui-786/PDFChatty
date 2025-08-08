@@ -1,7 +1,13 @@
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
+import { Document } from "@langchain/core/documents";
 // Configuration
+type Metadata = {
+  user_id: string;
+  pdf_id: string;
+  [key: string]: unknown; // Allow other metadata from LangChain (like 'loc', 'pageNumber', etc.)
+};
 const CONFIG = {
   geminiApiKey: process.env.GOOGLE_API_KEY!,
   pineconeApiKey: process.env.PINECONE_API_KEY!,
@@ -33,7 +39,7 @@ export const getRetriever =  (id:string) => vectorStore.asRetriever({
   }
 })
 
-export const uploadToSupabase = async (output: any) => {
+export const uploadToSupabase = async (output:Document<Metadata>[] ) => {
   await SupabaseVectorStore.fromDocuments(output, embeddings, {
     client,
     tableName: "documents",

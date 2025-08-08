@@ -1,10 +1,9 @@
-import FlowChart from '@/app/flow/components/FlowChart';
-import PDFChatbot from '@/components/ChatBox';
 import { validateRequest } from '@/lib/db/auth';
 import { createClient } from '@/lib/db/supabaseServer';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import React, { Suspense } from 'react'
+import FlowChart from './components/FlowChart';
 
 
 interface PageProps {
@@ -52,7 +51,7 @@ async function  page({params}:PageProps) {
   const chat = await getPost(chatId, user.id);
   
   return (
-         <main className="h-full flex-1">
+         <main className=" flex-1">
            <Suspense
              fallback={
                <div className="flex items-center justify-center h-full">
