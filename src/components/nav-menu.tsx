@@ -3,23 +3,11 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ComponentProps } from "react";
-
-const links = [
-  {
-    href: "https://x.com/Taquiimam14",
-    label: "Twitter"
-  },
-  {
-    href: "https://github.com/taqui-786",
-    label: "Github"
-  },
-
-];
 
 export const NavMenu = ({
   className,
@@ -31,21 +19,33 @@ export const NavMenu = ({
     <NavigationMenu {...props}>
       <NavigationMenuList
         className={cn({
-          "flex-col items-start gap-4": orientation === "vertical"
+          "flex-col items-start gap-4": orientation === "vertical",
         })}
       >
-        {links.map((link) => (
-          <NavigationMenuItem key={link.href}>
-            <NavigationMenuLink
-              asChild
-              className={navigationMenuTriggerStyle({
-                className: cn({ "text-xl": orientation === "vertical" })
-              })}
-            >
-              <Link href={link.href}>{link.label}</Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        ))}
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            asChild
+            className={navigationMenuTriggerStyle({
+              className: cn({ "text-xl": orientation === "vertical" }),
+            })}
+          >
+            <Link href={"https://x.com/Taquiimam14"} target={"_blank"}>
+              Twitter
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            asChild
+            className={navigationMenuTriggerStyle({
+              className: cn({ "text-xl": orientation === "vertical" }),
+            })}
+          >
+            <Link href={"https://github.com/taqui-786"} target={"_blank"}>
+              Github
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
