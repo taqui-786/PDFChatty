@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
 
-      return NextResponse.redirect(process.env.NEXT_PUBLIC_SITE_URL as string)
+      return NextResponse.redirect('https://pdflow-free.vercel.app')
       // if (isLocalEnv) {
       //   // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
       //   return NextResponse.redirect(`${origin}${next}`)
