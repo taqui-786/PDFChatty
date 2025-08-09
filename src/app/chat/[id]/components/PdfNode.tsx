@@ -15,7 +15,6 @@ interface PDFNodeData {
 
 export default function PDFNode({ data, selected }: NodeProps<PDFNodeData>) {
   const [scale, setScale] = useState<number>(0.8);
-console.log({data});
 
   const zoomIn = () => {
     setScale((prev) => Math.min(prev + 0.2, 2.0));
