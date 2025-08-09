@@ -1,4 +1,4 @@
-import { Handle, Node, NodeProps, Position, useReactFlow } from "reactflow";
+import { Handle, NodeProps, Position, useReactFlow } from "reactflow";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { BotMessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { Tool, Tools } from "./Tool";
 import ChatDailog from "./ChatDailog";
 import axios from "axios";
 import MarkdownContent from "@/components/MarkdownContent";
+import { Skeleton } from "@/components/ui/skeleton";
 interface MyCustomNodeProps {
   type: string;
   pdfId: string;
@@ -88,12 +89,11 @@ export const MyCustomNode = ({
     [content]
   );
 
-  // Use useEffect with stable dependencies and add a condition to prevent re-runs
   useEffect(() => {
     if (theNode && !hasInitialized.current && !getAnswerMutation.isPending) {
       handleNodeClick();
     }
-  }, [theNode, handleNodeClick]); // Remove data.type as it's already in handleNodeClick deps
+  }, [theNode, handleNodeClick]);
 
   return (
     <div
@@ -142,6 +142,13 @@ export const MyCustomNode = ({
           </div>
 
           <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+            {
+              loading ? 
+              <Loader2
+                className={`animate-spin text-primary`}
+                size={20}
+              /> :""
+            }
             {/* Fullscreen Button */}
             <button
               onClick={handleFullscreen}
@@ -231,13 +238,31 @@ export const MyCustomNode = ({
         >
           {loading ? (
             <div className="flex flex-col gap-4 items-center justify-center h-36 w-full">
-              <Loader2
+              {/* <Loader2
                 className={`animate-spin text-[${theNode?.color.text}]`}
                 size={28}
               />
               <span className="text-sm text-muted-foreground">
                 generating result...
-              </span>
+              </span> */}
+             
+              <div className="flex gap-4 w-full">
+                <Skeleton className="h-5 w-24 rounded-none" />
+                <Skeleton className="h-5 w-full rounded-none" />
+              </div>
+              <div className="flex gap-4 w-full">
+                <Skeleton className="h-5 w-full rounded-none" />
+                <Skeleton className="h-5 w-40 rounded-none" />
+              </div>
+              <div className="flex gap-4 w-full">
+                <Skeleton className="h-5 w-12 rounded-none" />
+                <Skeleton className="h-5 w-full rounded-none" />
+                <Skeleton className="h-5 w-20 rounded-none" />
+              </div>
+              <div className="flex gap-4 w-full">
+                <Skeleton className="h-5 w-1/2 rounded-none" />
+                <Skeleton className="h-5 w-full rounded-none" />
+              </div>
             </div>
           ) : (
             <MarkdownContent content={content} />
